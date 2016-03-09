@@ -15,11 +15,10 @@ class HeaderAnalizer(object):
 
 
     def __init__(self, message_string ):
-        if type(message_string) != email.Message:
-            raise NotMessageObject
+        if not isinstance(message_string, email.Message):
+            raise NotMessageObject()
         else:
-            self.message = message_string
-            
+            self.message = message_string   
     
     def getHeaders(self):
         pass

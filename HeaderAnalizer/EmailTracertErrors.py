@@ -13,3 +13,16 @@ class NotMessageObject(Exception):
     def __init__(self):
         pass
     
+
+class InvalidToken(Exception):
+    '''
+    TokeAnalizer Classes analize values of the message's headers,
+    usually with a structured format, containing specific token.
+    This exception MUST be raised when this token is not found or
+    is not valid.
+    '''
+    def __init__(self,value,expected_token):
+        self.value = value
+        self.expected_token = expected_token
+        
+    
