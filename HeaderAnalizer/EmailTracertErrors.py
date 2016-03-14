@@ -25,4 +25,10 @@ class InvalidToken(Exception):
         self.value = value
         self.expected_token = expected_token
         
-    
+class InvalidValue(Exception):
+    '''
+    This class SHOULD be raise if we found some value that
+    doesn't match with any expected possible value
+    '''
+    def __init__(self,value):
+        pass
