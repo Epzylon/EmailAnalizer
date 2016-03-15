@@ -5,7 +5,6 @@ Created on Mar 8, 2016
 '''
 
 import HeaderAnalizer.EmailTracertErrors.InvalidToken as InvalidToken
-import HeaderAnalizer.EmailTracertErrors.InvalidValue as InvalidValue
 import email.utils.parsedate as ParseDate
 import ipaddr.IPAddress as IP
 
@@ -21,28 +20,24 @@ class ExtendedDomain(object):
               }
     def __init__(self,value):
         self.v_list = value.split()
-        remove_chars = ['[',']','(',')']
-        #Get a list wit the values
-        if len(self.v_list) == 1:
-            
-            single_value = self.v_list[0]
-            single_value = self.__remove_chars(single_value, remove_chars)
-            
-            if self.__is_domain(single_value):
-                self.values['domain'] = single_value
+        self.__r_chars = ['[',']','(',')']
+        self.__fill_values(self.v_list)
+        
+        
+    def __fill_values(self,value_list):            
+        for val in value_list:
+            val = self.__remove_chars(val, self.__r_chars)
+            if self.__is_domain(val):
+                self.values['domain'] = val
             else:
                 try:
-                    IP(single_value)
+                    IP(val)
                 except:
-                    raise InvalidValue(self.value)
+                    self.values['extra'] = self.values['extra'] + val
                 else:
-                    self.values['ip'] = single_value
-        if len(self.v_list) > 1:
-            pass
-                   
-        else:
-            pass
-    
+                    self.values['ip'] = val
+            
+                
     def __remove_chars(self,value,chars_list):
         for char in chars_list:
             value = value.replace(char,"")
