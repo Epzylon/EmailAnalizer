@@ -21,12 +21,12 @@ class ExtendedDomain(object):
               }
     def __init__(self,value):
         self.v_list = value.split()
+        remove_chars = ['[',']','(',')']
         #Get a list wit the values
         if len(self.v_list) == 1:
             
             single_value = self.v_list[0]
-            single_value = self.__remove_brackets(single_value)
-            single_value = self.__remove_parenthesis(single_value)
+            single_value = self.__remove_chars(single_value, remove_chars)
             
             if self.__is_domain(single_value):
                 self.values['domain'] = single_value
@@ -42,17 +42,12 @@ class ExtendedDomain(object):
                    
         else:
             pass
-        
-    def __remove_brackets(self,value):
-        value = value.replace("[","")
-        value = value.replace("]","")
+    
+    def __remove_chars(self,value,chars_list):
+        for char in chars_list:
+            value = value.replace(char,"")
         return value
-    
-    def __remove_parenthesis(self,value):
-        value = value.replace("(","")
-        value = value.replace(")","")
-
-    
+  
     def __is_domain(self,value):
         v_list = value.split(".")
         if v_list[-1].isalpha():
