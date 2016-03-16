@@ -4,9 +4,10 @@ Created on Mar 8, 2016
 @author: Gustavo Rodriguez
 '''
 
-import HeaderAnalizer.EmailTracertErrors.InvalidToken as InvalidToken
-import email.utils.parsedate as ParseDate
-import ipaddr.IPAddress as IP
+from HeaderAnalizer.EmailTracertErrors import InvalidToken
+from email.utils import parsedate as ParseDate
+from IPy import IP
+
 
 class ExtendedDomain(object):
     '''
@@ -14,14 +15,22 @@ class ExtendedDomain(object):
     on the RFC 5321, section 4.4 as Extended-Domain in Augmented BNF notation
     This object receive this strings and make the analisys/disection
     '''
-    values = {'ip':'',
+
+    
+    def __init__(self,value):
+        
+        #Values dictionary
+        self.values = {'ip':'',
               'domain':'',
+              'port':'',
               'extra':''
               }
-    def __init__(self,value):
+        
         self.v_list = value.split()
         self.__r_chars = ['[',']','(',')']
         self.__fill_values(self.v_list)
+        
+        
         
         
     def __fill_values(self,value_list):            
@@ -33,7 +42,20 @@ class ExtendedDomain(object):
                 try:
                     IP(val)
                 except:
-                    self.values['extra'] = self.values['extra'] + val
+                    #Tiny fix to dectect ips/domains with port
+                    if val.find(':') != -1:
+                        ipdom,port = val.split(':')
+                        self.values['port'] = port
+                        try:
+                            #Let see if it is an ip
+                            IP(ipdom)
+                            self.values['ip'] = ipdom
+                        except:
+                            #otherwise it should be a domain
+                            if self.__is_domain(ipdom):
+                                self.values['domain'] = ipdom
+                    else:
+                        self.values['extra'] = self.values['extra'] + val
                 else:
                     self.values['ip'] = val
             
@@ -44,9 +66,13 @@ class ExtendedDomain(object):
         return value
   
     def __is_domain(self,value):
-        v_list = value.split(".")
-        if v_list[-1].isalpha():
-            return True
+        #Domain should have at least on dot
+        if value.find('.') != -1:
+            v_list = value.split(".")
+            if v_list[-1].isalpha():
+                return True
+            else:
+                return False
         else:
             return False
 

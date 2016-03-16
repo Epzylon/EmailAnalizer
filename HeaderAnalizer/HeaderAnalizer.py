@@ -3,7 +3,7 @@ Created on Mar 8, 2016
 
 @author: grodriguez
 '''
-import email
+import email.message.Message as message
 from HeaderAnalizer.EmailTracertErrors import NotMessageObject
 
 
@@ -15,7 +15,7 @@ class HeaderAnalizer(object):
 
 
     def __init__(self, message_string ):
-        if not isinstance(message_string, email.Message):
+        if not isinstance(message_string, message):
             raise NotMessageObject()
         else:
             self.message = message_string   
