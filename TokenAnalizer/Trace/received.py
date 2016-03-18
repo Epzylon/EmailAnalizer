@@ -31,7 +31,12 @@ class ExtendedDomain(object):
         self.__fill_values(self.v_list)
         
         
-        
+    def __str__(self):
+        string = ""
+        for i in self.values.keys():
+            string = string + i + ": " + self.values[i] + " "
+        return string
+            
         
     def __fill_values(self,value_list):            
         for val in value_list:
@@ -88,7 +93,7 @@ class Received(object):
         self.received_value = received_value
         
         #Valid Tokens
-        tokens = ["from","by","via","with","id"]
+        tokens = ["from","by","via","with","for","id"]
                
         #Value must have two parts, FROM part and DATE part
         #divided by a colon
@@ -109,17 +114,28 @@ class Received(object):
                           'by':[],
                           'via':[],
                           'with':[],
-                          'id':[]
+                          'id':[],
+                          'for':[],
+                          'date': self.date
             }
-            
+            #TODO: This part brokes if the first word of the string is not
+            # a token
             for word in from_list:
                 if word in tokens:
                     token_found = word
                 else:
                     self.values[token_found].append(word)
+
             if self.values['from'] == []:
                 self.internal_jump = True
             else:
                 self.internal_jump = False
         else:
             raise InvalidToken(self.received_value,";")
+    
+    def __str__(self):
+        string = ""
+        for i in self.values.keys():
+            if self.values[i] != []:
+                string = string + i + ": " + str(self.values[i]) + " "
+        return string
