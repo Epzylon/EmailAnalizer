@@ -6,6 +6,7 @@ Created on Mar 8, 2016
 
 from HeaderAnalizer.EmailTracertErrors import InvalidToken
 from email.utils import parsedate as ParseDate
+from email.utils import parseaddr as ParseAddr
 from ipaddress import ip_address as ip
 
 
@@ -17,7 +18,7 @@ class ExtendedDomain(object):
     '''
 
     
-    def __init__(self,value):
+    def __init__(self,value=None,ip=None,domain=None,port=None,extra=None):
         
         #Values dictionary
         self.values = {'ip':'',
@@ -25,10 +26,19 @@ class ExtendedDomain(object):
               'port':'',
               'extra':[]
               }
-        
-        self.v_list = value.split()
         self.__r_chars = ['[',']','(',')']
-        self.__fill_values(self.v_list)
+        
+        if value == None:
+            if ip != None:
+                self.values['ip'] = ip
+            if domain != None:
+                self.values['domain'] = domain
+            if port != None:
+                self.values['port'] = port
+            if extra != None:
+                self.values['extra'] = extra
+        else:
+            self.__fill_values(value)
         
         
     def __str__(self):
@@ -36,8 +46,17 @@ class ExtendedDomain(object):
         for i in self.values.keys():
             string = string + i + ": " + self.values[i] + " "
         return string
-            
-        
+    
+    def repr(self):
+        r = "ExtendedDomain("
+        for key in self.values.keys():
+            print("key: " + str(key))
+            print("value: " + str(self.values[key]))
+            if self.values[key] != '':
+                r = r + str(key) + "=\"" + str(self.values[key]) + "\","
+        r = r + ")"
+        return r
+    
     def __fill_values(self,value_list):            
         for val in value_list:
             #TODO: Before remove brackets and parenthesis
@@ -148,6 +167,19 @@ class Received(object):
                 self.internal_jump = False
         else:
             raise InvalidToken(self.received_value,";")
+        
+        self._parse_by()
+        self._parse_from()
+        
+        
+    def _parse_from(self):
+        self.values['from'] = ExtendedDomain(self.values['from'])
+            
+    def _parse_by(self):
+        self.values['by'] = ExtendedDomain(self.values['by'])  
+    
+    def _parse_for(self):
+        self.values['for'] = ParseAddr(self.values['for'])
     
     def __str__(self):
         string = ""
