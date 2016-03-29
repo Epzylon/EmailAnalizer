@@ -38,7 +38,7 @@ class ExtendedDomain(object):
             if extra != None:
                 self.values['extra'] = extra
         else:
-            self.__fill_values(value)
+            self.__fill_values(value.split())
         
         
     def __str__(self):
@@ -47,13 +47,13 @@ class ExtendedDomain(object):
             string = string + i + ": " + self.values[i] + " "
         return string
     
-    def repr(self):
+    def __repr__(self):
         r = "ExtendedDomain("
         for key in self.values.keys():
-            print("key: " + str(key))
-            print("value: " + str(self.values[key]))
             if self.values[key] != '':
                 r = r + str(key) + "=\"" + str(self.values[key]) + "\","
+        #Strip the last ,
+        r = r[:-1]
         r = r + ")"
         return r
     
@@ -173,13 +173,13 @@ class Received(object):
         
         
     def _parse_from(self):
-        self.values['from'] = ExtendedDomain(self.values['from'])
+        self.values['from'] = ExtendedDomain(value=self.values['from'])
             
     def _parse_by(self):
-        self.values['by'] = ExtendedDomain(self.values['by'])  
+        self.values['by'] = ExtendedDomain(value=self.values['by'])  
     
     def _parse_for(self):
-        self.values['for'] = ParseAddr(self.values['for'])
+        self.values['for'] = ParseAddr(value=self.values['for'])
     
     def __str__(self):
         string = ""

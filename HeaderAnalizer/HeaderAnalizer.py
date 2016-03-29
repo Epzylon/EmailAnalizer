@@ -26,12 +26,13 @@ class HeaderAnalizer(object):
     
     def _get_from(self):
         email_list = []
-        #As per RFC an email MUST have only on From fiel
+        #As per RFC an email MUST have only on From field
         froms = self.message.get('from')
         for email in froms:
             email_list.append(address(email))
         return email_list
     
+
     def getHeaders(self):
         pass
     
