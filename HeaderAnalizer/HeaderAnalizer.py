@@ -2,8 +2,8 @@
 Created on Mar 8, 2016
 @author: grodriguez
 '''
-import email.message.Message as message
-import email.utils.parseaddr as address
+from email.message import Message as message
+from email.utils import parseaddr as address
 from HeaderAnalizer.EmailTracertErrors import NotMessageObject
 
 
@@ -15,10 +15,10 @@ class HeaderAnalizer(object):
     from_emails = []
 
     def __init__(self, message_string ):
-        if not isinstance(message_string, message):
-            raise NotMessageObject()
-        else:
-            self.message = message_string     
+#         if not isinstance(message_string, message):
+#             raise NotMessageObject()
+#         else:
+#             self.message = message_string     
         self.from_emails = self._get_from()  
        
        

@@ -4,10 +4,10 @@ Created on Mar 8, 2016
 @author: Gustavo Rodriguez
 '''
 
-from HeaderAnalizer.EmailTracertErrors import InvalidToken
 from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
 from ipaddress import ip_address as ip
+
 
 
 class ExtendedDomain(object):
@@ -38,24 +38,27 @@ class ExtendedDomain(object):
             if extra != None:
                 self.values['extra'] = extra
         else:
-            self.__fill_values(value.split())
+            self.__fill_values(value)
         
         
     def __str__(self):
-        string = ""
-        for i in self.values.keys():
-            string = string + i + ": " + self.values[i] + " "
-        return string
+        return self.__repr__()
     
     def __repr__(self):
         r = "ExtendedDomain("
+        r_attr = ""
         for key in self.values.keys():
-            if self.values[key] != '':
-                r = r + str(key) + "=\"" + str(self.values[key]) + "\","
-        #Strip the last ,
-        r = r[:-1]
-        r = r + ")"
-        return r
+            if self.values[key] == '' or self.values[key] == []:
+                pass
+            else:
+                r_attr = r_attr + str(key) + "=\"" + str(self.values[key]) + "\","
+        if r_attr == "":
+            return ""
+        else:
+            #Strip the last ,
+            r = r + r_attr[:-1]
+            r = r + ")"
+            return r
     
     def __fill_values(self,value_list):            
         for val in value_list:
@@ -184,6 +187,6 @@ class Received(object):
     def __str__(self):
         string = ""
         for i in self.values.keys():
-            if self.values[i] != []:
+            if self.values[i] != [] and self.values[i] != '':
                 string = string + i + ": " + str(self.values[i]) + " "
         return string
