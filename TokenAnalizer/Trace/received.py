@@ -174,19 +174,35 @@ class Received(object):
         self._parse_by()
         self._parse_from()
         
-        
     def _parse_from(self):
-        self.values['from'] = ExtendedDomain(value=self.values['from'])
+        if self.values['from'] != []:
+            self.values['from'] = ExtendedDomain(value=self.values['from'])
             
     def _parse_by(self):
-        self.values['by'] = ExtendedDomain(value=self.values['by'])  
+        if self.values['by'] != []:
+            self.values['by'] = ExtendedDomain(value=self.values['by'])  
     
     def _parse_for(self):
-        self.values['for'] = ParseAddr(value=self.values['for'])
+        if self.values['for'] != []:
+            self.values['for'] = ParseAddr(value=self.values['for'])
     
     def __str__(self):
-        string = ""
-        for i in self.values.keys():
-            if self.values[i] != [] and self.values[i] != '':
-                string = string + i + ": " + str(self.values[i]) + " "
-        return string
+#         string = ""
+#         for i in self.values.keys():
+#             if self.values[i] != [] and self.values[i] != '':
+#                 string = string + i + ": " + str(self.values[i]) + " "
+#         return string
+        return self.__repr__()
+    
+    def __repr__(self):
+        string = "Received("
+        vals = ""
+        for key in self.values.keys():
+            if self.values[key] == '' or self.values[key] == []:
+                pass
+            else:
+                vals = vals + str(key) + "=" + str(self.values[key]) + ","
+        if vals == "":
+            return ""
+        else:
+            return string + vals[:-1] + ")"
