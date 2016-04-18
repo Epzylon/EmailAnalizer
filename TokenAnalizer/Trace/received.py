@@ -10,6 +10,8 @@ from ipaddress import ip_address as ip
 
 
 
+
+
 class ExtendedDomain(object):
     '''
     The information related to the tokens FROM and BY is called an described
