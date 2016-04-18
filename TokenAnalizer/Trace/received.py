@@ -6,6 +6,7 @@ Created on Mar 8, 2016
 
 from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
+from HeaderAnalizer.EmailTracertErrors import InvalidValue
 from ipaddress import ip_address as ip
 
 
@@ -127,52 +128,80 @@ class Received(object):
     https://tools.ietf.org/html/rfc5321#section-4.4
     '''
     
-    def __init__(self, received_value):
-        self.received_value = received_value
+    def __init__(self, received_value=None,
+                 from_val=None,
+                 by_val=None,
+                 via_val=None,
+                 with_val=None,
+                 for_val=None,
+                 id=None,
+                 date_val=None):
         
         #Valid Tokens
         tokens = ["from","by","via","with","for","id"]
-               
-        #Value must have two parts, FROM part and DATE part
-        #divided by a colon
-        if self.received_value.find(";"):
-            from_field,date_field = self.received_value.split(";")
-            
-            #Time of arrive to the server
-            self.date = ParseDate(date_field)
-            
-            #Lets turn to Lower case to avoid errors on find method
-            from_field = from_field.lower()
-            
-            #Lets break the from_field in to a list
-            from_list = from_field.split()
-            
-            self.values = {
-                          'from':[],
-                          'by':[],
-                          'via':[],
-                          'with':[],
-                          'id':[],
-                          'for':[],
-                          'date': self.date
-            }
-            #TODO: This part brokes if the first word of the string is not
-            # a token
-            for word in from_list:
-                if word in tokens:
-                    token_found = word
-                else:
-                    self.values[token_found].append(word)
-
-            if self.values['from'] == []:
-                self.internal_jump = True
-            else:
-                self.internal_jump = False
-        else:
-            raise InvalidToken(self.received_value,";")
         
-        self._parse_by()
-        self._parse_from()
+        self.values = {
+                       'from':[],
+                       'by':[],
+                       'via':[],
+                       'with':[],
+                       'id':[],
+                       'for':[],
+                       'date': ''
+                       }    
+        if received_value != None:
+            self.received_value = received_value
+        
+            #Value must have two parts, FROM part and DATE part
+            #divided by a colon
+            if self.received_value.find(";"):
+                from_field,date_field = self.received_value.split(";")
+            
+                #Time of arrive to the server
+                self.date = ParseDate(date_field)
+                self.values['date'] = self.date
+                #Lets turn to Lower case to avoid errors on find method
+                from_field = from_field.lower()
+            
+                #Lets break the from_field in to a list
+                from_list = from_field.split()
+            
+                #TODO: This part brokes if the first word of the string is not
+                # a token
+                for word in from_list:
+                    if word in tokens:
+                        token_found = word
+                    else:
+                        self.values[token_found].append(word)
+
+                if self.values['from'] == []:
+                    self.internal_jump = True
+                else:
+                    self.internal_jump = False
+            else:
+                raise InvalidToken(self.received_value,";")
+        
+            self._parse_by()
+            self._parse_from()
+        else:
+            if from_val != None:
+                self.values['from'] = from_val
+            if by_val != None:
+                self.values['by'] = by_val
+            if with_val != None:
+                self.values['with'] = with_val
+            if for_val != None:
+                self.values['for'] = for_val
+            if id_val != None:
+                self.values['id'] = id_val
+            if via_val != None:
+                self.values['via'] = via_val
+            if date_val != None:
+                self.values['date'] = date_val
+
+        if date_val == None and received_value == None:
+            raise InvalidValue()
+            
         
     def _parse_from(self):
         if self.values['from'] != []:
