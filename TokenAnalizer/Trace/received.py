@@ -136,7 +136,7 @@ class Received(object):
                  via_val=None,
                  with_val=None,
                  for_val=None,
-                 id=None,
+                 id_val=None,
                  date_val=None):
         
         #Valid Tokens
