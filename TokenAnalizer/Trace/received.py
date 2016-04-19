@@ -168,11 +168,14 @@ class Received(object):
             
                 #TODO: This part brokes if the first word of the string is not
                 # a token
+                got_token = False
                 for word in from_list:
                     if word in tokens:
+                        got_token = True
                         token_found = word
                     else:
-                        self.values[token_found].append(word)
+                        if got_token:
+                            self.values[token_found].append(word)
 
                 if self.values['from'] == []:
                     self.internal_jump = True
@@ -216,11 +219,6 @@ class Received(object):
             self.values['for'] = ParseAddr(value=self.values['for'])
     
     def __str__(self):
-#         string = ""
-#         for i in self.values.keys():
-#             if self.values[i] != [] and self.values[i] != '':
-#                 string = string + i + ": " + str(self.values[i]) + " "
-#         return string
         return self.__repr__()
     
     def __repr__(self):
