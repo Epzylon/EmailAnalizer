@@ -2,7 +2,7 @@
 Created on Mar 8, 2016
 @author: grodriguez
 '''
-from email.message import Message as message
+from email import message_from_string as m_string
 from email.utils import parseaddr as address
 from HeaderAnalizer.EmailTracertErrors import NotMessageObject
 
@@ -14,23 +14,18 @@ class HeaderAnalizer(object):
     '''
     from_emails = []
 
-    def __init__(self, message_string ):
-#         if not isinstance(message_string, message):
-#             raise NotMessageObject()
-#         else:
-#             self.message = message_string     
-        self.from_emails = self._get_from()  
+    def __init__(self, message_string):
+        try:
+            self.message = m_string(message_string)
+        except:
+            pass
+        else:
+            self.from_address = address(self.message.get('from'))
+            
+
        
        
-    
-    def _get_from(self):
-        email_list = []
-        #As per RFC an email MUST have only on From field
-        froms = self.message.get('from')
-        for email in froms:
-            email_list.append(address(email))
-        return email_list
-    
+
 
     def getHeaders(self):
         pass
