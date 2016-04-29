@@ -23,10 +23,11 @@ class HeaderAnalizer(object):
         else:
             #############################################
             # Headers that should appears at most once  #
+            # and should have only one value            #
             #############################################
             
             #Odd header            
-            self.orig_date = date(self.message.get('orig-date'))
+            self.orig_date = date(self.message.get('date'))
             
             #Address type headers
             self.sender = address(self.message.get('sender'))
@@ -34,18 +35,61 @@ class HeaderAnalizer(object):
             
             #ID type headers
             self.message_id = self.message.get('message-id')
-            self.in_reply_to = self.message.get('in-reply-to')
-            self.references = self.message.get('references')
             
             #Subject
             self.subject = self.message.get('subject')
             
             
             #############################################
-            # Headers that could appears more than once #
+            # Headers that should appears once but could#
+            # have multiple values on it                #
             #############################################
             
-            #From,bcc,cc,reply-to
+            #Address type fields
+            self.from_list = []
+            self.bcc_list = []
+            self.cc_list = []
+            self.reply-to_list = []
+            
+            for addr in self.message.get('from'):
+                self.from_list.append(address(addr))
+            
+            for addr in self.message.get('bcc'):
+                self.bcc_list.append(address(addr))
+                
+            for addr in self.message.get('cc'):
+                self.cc_list.append(address(addr))
+            
+            for addr in self.message.get('reply-to'):
+                self.reply-to_list.append(address(addr))
+            
+            #Message id type
+            self.references_list = []
+            self.inReplyTo_list = []
+            
+            message_ids = self.message.get('references')
+            for mid in message_ids:
+                self.references_list.append(mid)
+            
+            message_ids = self.message.get('in-reply-to')
+            for mid in message_ids:
+                self.inReplyTo_list.append(mid)
+            
+            #################################################
+            # Headers that has unlimited appears restriction #
+            #################################################
+            
+            self.comments = []
+            self.keywords = []
+            
+            for comment in self.message.get('comments'):
+                self.comments.append(comment)
+                
+            for keys in self.message.get_all('keywords'):
+                for key in str.split(keys,","):
+                    self.keywords.append(key)
+            
+            
             
             
 
