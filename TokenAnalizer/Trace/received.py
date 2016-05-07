@@ -8,6 +8,7 @@ from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
 from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
 from ipaddress import ip_address as ip
+from TokenAnalizer.utils import WhatIs
 
 
 
@@ -83,7 +84,7 @@ class ExtendedDomain(object):
                 #It could be a tuple ip:port
                 if val.find(':') != -1:
                     possible_ip,port = val.split(':')
-                    if self._is_ip(possible_ip):
+                    if WhatIs(possible_ip).IsIP():
                         self.values['ip'] = ip(possible_ip)
                         self.values['port'] = port
                 #Or somenthing else
@@ -96,19 +97,7 @@ class ExtendedDomain(object):
         for char in chars_list:
             value = value.replace(char,"")
         return value
-    
-    def _is_ip(self, str_to_test,version=4):
-        try:
-            is_ip = ip(str_to_test)
-        except:
-            return False
-        else:
-            if is_ip.version == version:
-                return True
-            else:
-                return False
-
-        
+           
   
     def __is_domain(self,value):
         #Domain should have at least on dot
