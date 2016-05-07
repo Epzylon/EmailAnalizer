@@ -6,7 +6,7 @@ Created on Mar 8, 2016
 
 from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
-from HeaderAnalizer.EmailTracertErrors import InvalidValue
+from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
 from ipaddress import ip_address as ip
 
 

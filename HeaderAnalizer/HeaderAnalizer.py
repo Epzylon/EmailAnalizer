@@ -5,7 +5,6 @@ Created on Mar 8, 2016
 from email import message_from_string as m_string
 from email.utils import parseaddr as address
 from email.utils import parsedate as date
-from HeaderAnalizer.EmailTracertErrors import NotMessageObject
 
 
 
@@ -49,7 +48,7 @@ class HeaderAnalizer(object):
             self.from_list = []
             self.bcc_list = []
             self.cc_list = []
-            self.reply-to_list = []
+            self.reply_to_list = []
             
             for addr in self.message.get('from'):
                 self.from_list.append(address(addr))
@@ -61,7 +60,7 @@ class HeaderAnalizer(object):
                 self.cc_list.append(address(addr))
             
             for addr in self.message.get('reply-to'):
-                self.reply-to_list.append(address(addr))
+                self.reply_to_list.append(address(addr))
             
             #Message id type
             self.references_list = []
