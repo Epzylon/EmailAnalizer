@@ -5,6 +5,7 @@ Created on Mar 8, 2016
 from email import message_from_string as m_string
 from email.utils import parseaddr as address
 from email.utils import parsedate as date
+from TokenAnalizer.Identifiers import MessageID
 
 
 
@@ -33,7 +34,7 @@ class HeaderAnalizer(object):
             self.reply_to = address(self.message.get('reply-to'))
             
             #ID type headers
-            self.message_id = self.message.get('message-id')
+            self.message_id = MessageID(self.message.get('message-id'))
             
             #Subject
             self.subject = self.message.get('subject')

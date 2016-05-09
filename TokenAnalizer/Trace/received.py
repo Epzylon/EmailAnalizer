@@ -79,6 +79,8 @@ class ExtendedDomain(object):
             elif WhatIs(val).IsIPv4():
                 self._values['ip'] = ip(val)
             #Test if it is a ipv6
+            #TODO:Check
+            #BUG:Check if it really degtect IPv6
             elif WhatIs(val).IsIPv6():
                 self._values['ip'] = ip(val)
             #Otherwise
@@ -266,6 +268,8 @@ class Received(object):
             self._values['by'] = ExtendedDomain(value=self._values['by'])  
     
     def _parse_for(self):
+        #TODO: It could have several values
+        #must be parsed before create as ParseAddr
         if self._values['for'] != []:
             self._values['for'] = ParseAddr(self._values['for'])
     

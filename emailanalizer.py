@@ -26,7 +26,7 @@ else:
     for H in reclist:
         r = Received(H)
         if r.from_val != []:
-            print(r.via)
+            print(r.from_val.ip)
 
         
         
