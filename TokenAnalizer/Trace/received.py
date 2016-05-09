@@ -54,7 +54,7 @@ class ExtendedDomain(object):
         r = "ExtendedDomain("
         r_attr = ""
         for key in self._values.keys():
-            if self.values[key] == '' or self._values[key] == []:
+            if self._values[key] == '' or self._values[key] == []:
                 pass
             else:
                 r_attr = r_attr + str(key) + "=\"" + str(self._values[key]) + "\","
@@ -172,7 +172,7 @@ class Received(object):
                 from_field,date_field = self.received_value.split(";")
             
                 #Time of arrive to the server
-                self._values['date'] = ParseAddr(date_field)
+                self._values['date'] = ParseDate(date_field)
                 #Lets turn to Lower case to avoid errors on find method
                 from_field = from_field.lower()
             
@@ -185,14 +185,11 @@ class Received(object):
                     self.internal_jump = True
                 else:
                     self.internal_jump = False
-                
+                    
                 self._generate_attributes()
                 
             else:
                 raise InvalidToken(self.received_value,";")
-        
-            self._parse_by()
-            self._parse_from()
         else:
             if from_val != None:
                 self._values['from'] = from_val
@@ -201,14 +198,14 @@ class Received(object):
             if with_val != None:
                 self._values['with'] = with_val
             if for_val != None:
-                self.values['for'] = for_val
+                self._values['for'] = for_val
             if id_val != None:
                 self._values['id'] = id_val
             if via_val != None:
                 self._values['via'] = via_val
             if date_val != None:
                 self._values['date'] = date_val
-            
+
             self._generate_attributes()
 
         if date_val == None and received_value == None:
@@ -224,6 +221,11 @@ class Received(object):
         self.id = []
         self.for_val = []
         self.date = ''
+        
+        #Lets parse values
+        self._parse_by()
+        self._parse_for()
+        self._parse_from()
         
         #Fill attributes
         if self._values['from'] != []:
@@ -265,7 +267,7 @@ class Received(object):
     
     def _parse_for(self):
         if self._values['for'] != []:
-            self._values['for'] = ParseAddr(value=self._values['for'])
+            self._values['for'] = ParseAddr(self._values['for'])
     
     def __str__(self):
         return self.__repr__()
