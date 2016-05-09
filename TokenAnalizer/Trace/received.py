@@ -10,6 +10,7 @@ from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
 from ipaddress import ip_address as ip
 from TokenAnalizer.utils import WhatIs
 
+#TODO: Create a FOR class
 
 
 
@@ -96,13 +97,13 @@ class ExtendedDomain(object):
                     self._values['extra'].append(val)
                          
             
-                
+    #TODO: Move to utils          
     def __remove_chars(self,value,chars_list):
         for char in chars_list:
             value = value.replace(char,"")
         return value
            
-  
+    #TODO: Replace with utils function
     def __is_domain(self,value):
         #Domain should have at least on dot
         #TODO: Please improve this!!!!
@@ -164,7 +165,10 @@ class Received(object):
                        'id':[],
                        'for':[],
                        'date': ''
-                       }    
+                       }
+        
+        self.__r_chars = ['[',']','(',')','<','>']
+   
         if received_value != None:
             self.received_value = received_value
         
@@ -268,10 +272,15 @@ class Received(object):
             self._values['by'] = ExtendedDomain(value=self._values['by'])  
     
     def _parse_for(self):
-        #TODO: It could have several values
-        #must be parsed before create as ParseAddr
+        #TODO:Extra values in for string are beeing lost
         if self._values['for'] != []:
-            self._values['for'] = ParseAddr(self._values['for'])
+            for val in self._values['for']:
+                for c in self.__r_chars:
+                    val = val.strip(c)
+                    
+                if WhatIs(val).this() == 'email':
+                    self._values['for'] = ParseAddr(val)
+                    
     
     def __str__(self):
         return self.__repr__()
