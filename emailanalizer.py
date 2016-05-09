@@ -22,20 +22,12 @@ else:
     e = open_efile(open(args.mail_file))
     reclist = e.get_all('Received')
     reclist.reverse()
-    print('From\t\t\tTo\t\t\tAt')
+    print('From')
     for H in reclist:
         r = Received(H)
-        if r.values['by'].values['ip'] != []:
-            print(r.values['from'].values['ip'])
-        else:
-            print('\t\t\t')
-        print('\t\t\t')
-        if r.values['by'].values['ip'] != []:
-            print(r.values['by'].values['ip'])
-        else:
-            print('\t\t\t')
-        print('\t\t\t')
-        print(str(r.date[2]) + '/'+ str(r.date[1]) + '/' + str(r.date[0]))
+        if r.from_val != []:
+            print(r.via)
+
         
         
         

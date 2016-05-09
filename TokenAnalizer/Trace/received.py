@@ -25,7 +25,7 @@ class ExtendedDomain(object):
     def __init__(self,value=None,ip=None,domain=None,port=None,extra=None):
         
         #Values dictionary
-        self.values = {'ip':'',
+        self._values = {'ip':'',
               'domain':'',
               'port':'',
               'extra':[]
@@ -34,16 +34,18 @@ class ExtendedDomain(object):
         
         if value == None:
             if ip != None:
-                self.values['ip'] = ip
+                self._values['ip'] = ip
             if domain != None:
-                self.values['domain'] = domain
+                self._values['domain'] = domain
             if port != None:
-                self.values['port'] = port
+                self._values['port'] = port
             if extra != None:
-                self.values['extra'] = extra
+                self._values['extra'] = extra
         else:
             self.__fill_values(value)
-        
+            
+        #TODO: Please fix this uggly uggly method!
+        self.__generate_attributes()
         
     def __str__(self):
         return self.__repr__()
@@ -51,11 +53,11 @@ class ExtendedDomain(object):
     def __repr__(self):
         r = "ExtendedDomain("
         r_attr = ""
-        for key in self.values.keys():
-            if self.values[key] == '' or self.values[key] == []:
+        for key in self._values.keys():
+            if self.values[key] == '' or self._values[key] == []:
                 pass
             else:
-                r_attr = r_attr + str(key) + "=\"" + str(self.values[key]) + "\","
+                r_attr = r_attr + str(key) + "=\"" + str(self._values[key]) + "\","
         if r_attr == "":
             return ""
         else:
@@ -72,24 +74,24 @@ class ExtendedDomain(object):
             
             #Test if it is a domain
             if self.__is_domain(val):
-                self.values['domain'] = val
+                self._values['domain'] = val
             #Test if it is a ipv4
-            elif self._is_ip(val, 4):
-                self.values['ip'] = ip(val)
+            elif WhatIs(val).IsIPv4():
+                self._values['ip'] = ip(val)
             #Test if it is a ipv6
-            elif self._is_ip(val, 6):
-                self.values['ip'] = ip(val)
+            elif WhatIs(val).IsIPv6():
+                self._values['ip'] = ip(val)
             #Otherwise
             else:
                 #It could be a tuple ip:port
                 if val.find(':') != -1:
                     possible_ip,port = val.split(':')
                     if WhatIs(possible_ip).IsIP():
-                        self.values['ip'] = ip(possible_ip)
-                        self.values['port'] = port
+                        self._values['ip'] = ip(possible_ip)
+                        self._values['port'] = port
                 #Or somenthing else
                 else:
-                    self.values['extra'].append(val)
+                    self._values['extra'].append(val)
                          
             
                 
@@ -110,7 +112,31 @@ class ExtendedDomain(object):
                 return False
         else:
             return False
-
+    
+    def __generate_attributes(self):
+        # This function is to load the values in the dict
+        # to an attributes of the ExtendedDomain Object
+        
+        #Create attributes with no values
+        self.ip = ''
+        self.domain = ''
+        self.port = ''
+        self.extra = ''
+        
+        #fill attributes
+        if type(self._values['ip']) == ip:
+            self.ip = self._values['ip']   
+        
+        if len(self._values['domain']) != 0:
+            self.domain = self._values['domain']
+        
+        if len(self._values['port']) != 0:
+            self.domain = self.port = self._values['port']
+            
+        if len(self._values['extra']) != 0:
+            for e in self._values['extra']:
+                self.extra = self.extra + ' ' + e 
+            
 
 class Received(object):
     '''
@@ -127,11 +153,8 @@ class Received(object):
                  for_val=None,
                  id_val=None,
                  date_val=None):
-        
-        #Valid Tokens
-        tokens = ["from","by","via","with","for","id"]
-        
-        self.values = {
+
+        self._values = {
                        'from':[],
                        'by':[],
                        'via':[],
@@ -149,29 +172,22 @@ class Received(object):
                 from_field,date_field = self.received_value.split(";")
             
                 #Time of arrive to the server
-                self.date = ParseDate(date_field)
-                self.values['date'] = self.date
+                self._values['date'] = ParseAddr(date_field)
                 #Lets turn to Lower case to avoid errors on find method
                 from_field = from_field.lower()
             
                 #Lets break the from_field in to a list
                 from_list = from_field.split()
-            
-                #TODO: This part brokes if the first word of the string is not
-                # a token
-                got_token = False
-                for word in from_list:
-                    if word in tokens:
-                        got_token = True
-                        token_found = word
-                    else:
-                        if got_token:
-                            self.values[token_found].append(word)
+                #Detect and loads values for each token
+                self._fill_values(from_list)
 
-                if self.values['from'] == []:
+                if self._values['from'] == []:
                     self.internal_jump = True
                 else:
                     self.internal_jump = False
+                
+                self._generate_attributes()
+                
             else:
                 raise InvalidToken(self.received_value,";")
         
@@ -179,35 +195,77 @@ class Received(object):
             self._parse_from()
         else:
             if from_val != None:
-                self.values['from'] = from_val
+                self._values['from'] = from_val
             if by_val != None:
-                self.values['by'] = by_val
+                self._values['by'] = by_val
             if with_val != None:
-                self.values['with'] = with_val
+                self._values['with'] = with_val
             if for_val != None:
                 self.values['for'] = for_val
             if id_val != None:
-                self.values['id'] = id_val
+                self._values['id'] = id_val
             if via_val != None:
-                self.values['via'] = via_val
+                self._values['via'] = via_val
             if date_val != None:
-                self.values['date'] = date_val
+                self._values['date'] = date_val
+            
+            self._generate_attributes()
 
         if date_val == None and received_value == None:
             raise InvalidValue()
-            
         
+    def _generate_attributes(self):
+        
+        #Empty values
+        self.from_val = []
+        self.by = []
+        self.via = []
+        self.with_val = []
+        self.id = []
+        self.for_val = []
+        self.date = ''
+        
+        #Fill attributes
+        if self._values['from'] != []:
+            self.from_val = self._values['from']
+        if self._values['by'] != []:
+            self.by = self._values['by']
+        if self._values['via'] != []:
+            self.with_val = self._values['with']
+        if self._values['id'] != []:
+            self.id = self._values['id']
+        if self._values['for'] != []:
+            self.for_val = self._values['for']
+        if self._values['date'] != []:
+            self.date = self._values['date']
+            
+            
+    
+            
+    def _fill_values(self,from_list):
+                
+        #Valid Tokens
+        tokens = ["from","by","via","with","for","id"]
+        got_token = False
+        for word in from_list:
+            if word in tokens:
+                got_token = True
+                token_found = word
+            else:
+                if got_token:
+                    self._values[token_found].append(word)
+   
     def _parse_from(self):
-        if self.values['from'] != []:
-            self.values['from'] = ExtendedDomain(value=self.values['from'])
+        if self._values['from'] != []:
+            self._values['from'] = ExtendedDomain(value=self._values['from'])
             
     def _parse_by(self):
-        if self.values['by'] != []:
-            self.values['by'] = ExtendedDomain(value=self.values['by'])  
+        if self._values['by'] != []:
+            self._values['by'] = ExtendedDomain(value=self._values['by'])  
     
     def _parse_for(self):
-        if self.values['for'] != []:
-            self.values['for'] = ParseAddr(value=self.values['for'])
+        if self._values['for'] != []:
+            self._values['for'] = ParseAddr(value=self._values['for'])
     
     def __str__(self):
         return self.__repr__()
@@ -215,11 +273,11 @@ class Received(object):
     def __repr__(self):
         string = "Received("
         vals = ""
-        for key in self.values.keys():
-            if self.values[key] == '' or self.values[key] == []:
+        for key in self._values.keys():
+            if self._values[key] == '' or self._values[key] == []:
                 pass
             else:
-                vals = vals + str(key) + "=" + str(self.values[key]) + ","
+                vals = vals + str(key) + "=" + str(self._values[key]) + ","
         if vals == "":
             return ""
         else:
