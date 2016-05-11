@@ -8,7 +8,7 @@ from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
 from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
 from ipaddress import ip_address as ip
-from TokenAnalizer.utils import WhatIs
+from TokenAnalizer.utils import WhatIs, TextUtils
 
 #TODO: Create a FOR class
 
@@ -71,7 +71,7 @@ class ExtendedDomain(object):
         for val in value_list:
             #TODO: Before remove brackets and parenthesis
             #we should agroup this info
-            val = self.__remove_chars(val, self.__r_chars)
+            val = TextUtils(val).remove_chars(self.__r_chars)
             
             #Test if it is a domain
             if self.__is_domain(val):
@@ -88,20 +88,14 @@ class ExtendedDomain(object):
             else:
                 #It could be a tuple ip:port
                 if val.find(':') != -1:
-                    possible_ip,port = val.split(':')
+                    possible_ip,*port = val.split(':')
                     if WhatIs(possible_ip).IsIP():
                         self._values['ip'] = ip(possible_ip)
                         self._values['port'] = port
                 #Or somenthing else
                 else:
                     self._values['extra'].append(val)
-                         
-            
-    #TODO: Move to utils          
-    def __remove_chars(self,value,chars_list):
-        for char in chars_list:
-            value = value.replace(char,"")
-        return value
+
            
     #TODO: Replace with utils function
     def __is_domain(self,value):
@@ -125,9 +119,11 @@ class ExtendedDomain(object):
         self.domain = ''
         self.port = ''
         self.extra = ''
+        self.address = ''
         
         #fill attributes
-        if type(self._values['ip']) == ip:
+        #TODO: Fix that! type(val) != ip
+        if True:
             self.ip = self._values['ip']   
         
         if len(self._values['domain']) != 0:
@@ -139,6 +135,12 @@ class ExtendedDomain(object):
         if len(self._values['extra']) != 0:
             for e in self._values['extra']:
                 self.extra = self.extra + ' ' + e 
+        
+        #This attribute is a easy way to get the ip or the domain
+        if self.ip != '':
+            self.address = self.ip
+        elif self.domain != '':
+            self.address = self.domain
             
 
 class Received(object):
