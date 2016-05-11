@@ -6,6 +6,24 @@ Created on 4/5/2016
 from ipaddress import IPv4Address as ip4
 from ipaddress import IPv6Address as ip6
 
+
+            
+class TextUtils(object):
+    ''' Several string/text utils '''
+    
+    def __init__(self,raw):
+        self.raw
+        self._NULL = ''
+    
+    def remove_chars(self,char_list):
+        for c in char_list:
+            result = self.raw.replace(c,self._NULL)
+    
+        return result
+        
+        
+    
+    
 class WhatIs(object):
     '''
     Try to determine what is the given value
