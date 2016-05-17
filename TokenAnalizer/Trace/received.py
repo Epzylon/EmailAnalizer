@@ -138,7 +138,7 @@ class ExtendedDomain(object):
         
         #This attribute is a easy way to get the ip or the domain
         if self.ip != '':
-            self.address = self.ip
+            self.address = str(self.ip)
         elif self.domain != '':
             self.address = self.domain
             
