@@ -6,21 +6,50 @@ Created on 4/5/2016
 from ipaddress import IPv4Address as ip4
 from ipaddress import IPv6Address as ip6
 
+from pyparsing import *
 
-            
+
 class TextUtils(object):
     ''' Several string/text utils '''
     
     def __init__(self,raw):
-        self.raw
+        self.raw = raw
         self._NULL = ''
+        self._PARENTHESES = [('[',']'),('<','>'),('{','}'),('(',')')]
     
     def remove_chars(self,char_list):
+        '''Remove the chars given from the text'''
         for c in char_list:
             result = self.raw.replace(c,self._NULL)
     
         return result
-        
+    
+           
+def get_enclosed(raw):
+    
+    #Word ::= Ascii - Tokens
+    non_token = "!#$%&\'*+,-./:;=?@\\^_`|~"
+    word = Word(alphanums+non_token)
+
+    #Tokens ::= {}[]()<>
+    tokens = "{}[]()<>"
+    o_curly,c_curly,o_brack,c_brack,o_paren,c_paren,o_mayor,c_mayor = map(Suppress,tokens)
+    
+    
+    enclosed_data = Forward()
+    
+    #Enclosed groups
+    curly_enclosed = o_curly + enclosed_data + c_curly
+    brack_enclosed = o_brack + enclosed_data + c_brack
+    paren_enclosed = o_paren + enclosed_data + c_paren
+    mayor_enclosed = o_mayor + enclosed_data + c_mayor
+    
+    enclosed = ZeroOrMore(curly_enclosed|brack_enclosed|paren_enclosed|mayor_enclosed)
+    
+    enclosed_data << (ZeroOrMore(word) + enclosed + Optional(enclosed))
+
+    return enclosed_data.parseString(raw)
+    
         
     
     
