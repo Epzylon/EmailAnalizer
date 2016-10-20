@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#/usr/bin/env python
 import argparse
 from email import message_from_file as open_efile
 from TokenAnalizer.Trace.received import Received
@@ -22,14 +22,6 @@ else:
     e = open_efile(open(args.mail_file))
     reclist = e.get_all('Received')
     reclist.reverse()
-    print('FROM\t\t\tTO')
     for H in reclist:
         r = Received(H)
-        
-        if r.from_val != []:
-            print(r.from_val.address + '\t\t\t' + r.by.address)
-        else:
-            print('\t\t\t' + r.by.address)
-
-    
-        
+        print(r)

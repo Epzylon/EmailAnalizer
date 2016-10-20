@@ -2,6 +2,9 @@
 from HeaderAnalizer.HeaderAnalizer import HeaderAnalizer as HA
 from TokenAnalizer.Trace.received import ExtendedDomain as ED
 from TokenAnalizer.Trace.received import Received as REC
+from TokenAnalizer.Trace.received import Received2 as rec2
+from TokenAnalizer.utils import TextUtils as txt
+
 
 
 r_list = ['by 10.35.47.11 with SMTP id z11cs40515pyj; Sat, 25 Feb 2006 11:36:55 -0800 (PST)',
@@ -66,9 +69,13 @@ r_list = ['by 10.35.47.11 with SMTP id z11cs40515pyj; Sat, 25 Feb 2006 11:36:55 
           'by mail-io0-x232.google.com with SMTP id g203so19343732iof.2 for <lord.epzylon@gmail.com>; Wed, 24 Feb 2016 03:52:42 -0800 (PST)',
           'by 10.107.156.10 with HTTP; Wed, 24 Feb 2016 03:52:12 -0800 (PST)' ]
 
-for r in r_list:
-    received = REC(r)
-    print(received)
+#for i in r_list:
+#    m = get_enclosed(i)
+#    print(m)    
+text = txt("mail-io0-x232.google.com (mail-io0-x232.google.com. [2607:f8b0:4001:c06::232])").get_enclosed()
+print(text)
 
-    
+#s = "from mail-io0-x232.google.com (mail-io0-x232.google.com. [2607:f8b0:4001:c06::232]) by mx.google.com with ESMTPS id 199si1933561ioz.26.2016.02.24.03.52.42 for <lord.epzylon@gmail.com> (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128); Wed, 24 Feb 2016 03:52:42 -0800 (PST)"
+#m = get_enclosed(s.split(sep=";")[0])
+#r = rec2(s)
     

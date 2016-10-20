@@ -6,8 +6,7 @@ Created on 4/5/2016
 from ipaddress import IPv4Address as ip4
 from ipaddress import IPv6Address as ip6
 
-from pyparsing import *
-
+from pyparsing import OneOrMore, Optional, Suppress, Forward, alphanums, Word
 
 class TextUtils(object):
     ''' Several string/text utils '''
@@ -25,31 +24,31 @@ class TextUtils(object):
         return result
     
            
-def get_enclosed(raw):
+    def get_enclosed(self,raw):
     
-    #Word ::= Ascii - Tokens
-    non_token = "!#$%&\'*+,-./:;=?@\\^_`|~"
-    word = Word(alphanums+non_token)
+        #Word ::= Ascii - Tokens
+        non_token = "!#$%&\'*+,-./:;=?@\\^_`|~"
+        word = Word(alphanums+non_token)
+        #word = Word(printables)
+    
+        #Tokens ::= {}[]()<>
+        tokens = "{}[]()<>"  
+    
+        o_curly,c_curly,o_brack,c_brack,o_paren,c_paren,o_mayor,c_mayor = map(Suppress,tokens)
 
-    #Tokens ::= {}[]()<>
-    tokens = "{}[]()<>"
-    o_curly,c_curly,o_brack,c_brack,o_paren,c_paren,o_mayor,c_mayor = map(Suppress,tokens)
+        enclosed_data = Forward()
+        
+        #Enclosed groups
+        curly_enclosed = OneOrMore(o_curly + enclosed_data + c_curly)
+        brack_enclosed = OneOrMore(o_brack + enclosed_data + c_brack)
+        paren_enclosed = OneOrMore(o_paren + enclosed_data + c_paren)
+        mayor_enclosed = OneOrMore(o_mayor + enclosed_data + c_mayor)
     
+        enclosed = Optional(curly_enclosed) & Optional(brack_enclosed) & Optional(paren_enclosed) & Optional(mayor_enclosed) 
     
-    enclosed_data = Forward()
+        enclosed_data << ((OneOrMore(word) & enclosed) ^ enclosed)
     
-    #Enclosed groups
-    curly_enclosed = o_curly + enclosed_data + c_curly
-    brack_enclosed = o_brack + enclosed_data + c_brack
-    paren_enclosed = o_paren + enclosed_data + c_paren
-    mayor_enclosed = o_mayor + enclosed_data + c_mayor
-    
-    enclosed = ZeroOrMore(curly_enclosed|brack_enclosed|paren_enclosed|mayor_enclosed)
-    
-    enclosed_data << (ZeroOrMore(word) + enclosed + Optional(enclosed))
-
-    return enclosed_data.parseString(raw)
-    
+        return enclosed_data.parseString(raw)
         
     
     

@@ -4,11 +4,22 @@ Created on Mar 8, 2016
 @author: Gustavo Rodriguez
 '''
 
+#Email utils
 from email.utils import parsedate as ParseDate
 from email.utils import parseaddr as ParseAddr
+
+#Customized raised errors
 from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
+
+#Ip object
 from ipaddress import ip_address as ip
+
+#Utils to parse some strings
 from TokenAnalizer.utils import WhatIs, TextUtils
+
+#Pyparsing objects
+from pyparsing import OneOrMore, Group, Optional, Dict, Word, CaselessLiteral,\
+    ParseException, printables
 
 #TODO: Create a FOR class
 
@@ -150,152 +161,163 @@ class Received(object):
     https://tools.ietf.org/html/rfc5321#section-4.4
     '''
     
-    def __init__(self, received_value=None,
-                 from_val=None,
-                 by_val=None,
-                 via_val=None,
-                 with_val=None,
-                 for_val=None,
-                 id_val=None,
-                 date_val=None):
-
-        self._values = {
-                       'from':[],
-                       'by':[],
-                       'via':[],
-                       'with':[],
-                       'id':[],
-                       'for':[],
-                       'date': ''
-                       }
+    _FROM = 'from'
+    _BY = 'by'
+    _VIA = 'via'
+    _WITH = 'with'
+    _ID = 'id'
+    _FOR = 'for'
+    
+    
+    def __init__(self,received_value,rec_dict={}):
         
-        self.__r_chars = ['[',']','(',')','<','>']
-   
-        if received_value != None:
-            self.received_value = received_value
-        
-            #Value must have two parts, FROM part and DATE part
-            #divided by a colon
-            if self.received_value.find(";"):
-                from_field,date_field = self.received_value.split(";")
+        #Split the rec string and the date
+        if received_value.find(';'):
+            self._rec,self._date_string = received_value.split(';')
             
-                #Time of arrive to the server
-                self._values['date'] = ParseDate(date_field)
-                #Lets turn to Lower case to avoid errors on find method
-                from_field = from_field.lower()
-            
-                #Lets break the from_field in to a list
-                from_list = from_field.split()
-                #Detect and loads values for each token
-                self._fill_values(from_list)
-
-                if self._values['from'] == []:
-                    self.internal_jump = True
-                else:
-                    self.internal_jump = False
-                    
-                self._generate_attributes()
-                
-            else:
-                raise InvalidToken(self.received_value,";")
+            #Strip new line strings
+            self._date_string = self._date_string.replace('\n','')
         else:
-            if from_val != None:
-                self._values['from'] = from_val
-            if by_val != None:
-                self._values['by'] = by_val
-            if with_val != None:
-                self._values['with'] = with_val
-            if for_val != None:
-                self._values['for'] = for_val
-            if id_val != None:
-                self._values['id'] = id_val
-            if via_val != None:
-                self._values['via'] = via_val
-            if date_val != None:
-                self._values['date'] = date_val
-
-            self._generate_attributes()
-
-        if date_val == None and received_value == None:
-            raise InvalidValue()
+            self._rec = received_value
         
-    def _generate_attributes(self):
-        
-        #Empty values
-        self.from_val = []
-        self.by = []
-        self.via = []
-        self.with_val = []
-        self.id = []
-        self.for_val = []
-        self.date = ''
-        
-        #Lets parse values
-        self._parse_by()
-        self._parse_for()
-        self._parse_from()
-        
-        #Fill attributes
-        if self._values['from'] != []:
-            self.from_val = self._values['from']
-        if self._values['by'] != []:
-            self.by = self._values['by']
-        if self._values['via'] != []:
-            self.with_val = self._values['with']
-        if self._values['id'] != []:
-            self.id = self._values['id']
-        if self._values['for'] != []:
-            self.for_val = self._values['for']
-        if self._values['date'] != []:
-            self.date = self._values['date']
+        if rec_dict != {}:
+            self.received = rec_dict
+            self.Date = ParseDate(self.received['date'])
+        else:
+            self.received = self._parse_rec_string()   
             
-            
-    
-            
-    def _fill_values(self,from_list):
-                
-        #Valid Tokens
-        tokens = ["from","by","via","with","for","id"]
-        got_token = False
-        for word in from_list:
-            if word in tokens:
-                got_token = True
-                token_found = word
-            else:
-                if got_token:
-                    self._values[token_found].append(word)
+            #Set the date property
+            self.Date = ParseDate(self._date_string)
+             
+        self._fill_values()
    
-    def _parse_from(self):
-        if self._values['from'] != []:
-            self._values['from'] = ExtendedDomain(value=self._values['from'])
             
-    def _parse_by(self):
-        if self._values['by'] != []:
-            self._values['by'] = ExtendedDomain(value=self._values['by'])  
     
-    def _parse_for(self):
-        #TODO:Extra values in for string are beeing lost
-        if self._values['for'] != []:
-            for val in self._values['for']:
-                for c in self.__r_chars:
-                    val = val.strip(c)
-                    
-                if WhatIs(val).this() == 'email':
-                    self._values['for'] = ParseAddr(val)
-                    
+    def _parse_rec_string(self):
+        '''
+        Pyparsing parser to the received string
+        '''
+        #any word
+        word = Word(printables)
+        
+        #recognized tokens
+        from_t = CaselessLiteral(self._FROM)    
+        by_t = CaselessLiteral(self._BY)
+        with_t = CaselessLiteral(self._WITH)
+        id_t = CaselessLiteral(self._ID)
+        via_t = CaselessLiteral(self._VIA)
+        for_t = CaselessLiteral(self._FOR)
+    
+        #A group of non tokens
+        phrase = OneOrMore(~from_t + ~by_t + ~with_t + ~id_t + ~for_t + ~via_t + word)
+       
+        #Group phrase with token
+        from_g = Optional(Group(from_t+phrase))
+        by_g = Optional(Group(by_t+phrase))
+        with_g = Optional(Group(with_t+phrase))
+        id_g = Optional(Group(id_t+phrase))
+        via_g = Optional(Group(via_t+phrase))
+        for_g = Optional(Group(for_t+phrase))
+        
+        grouped_data = from_g & by_g & with_g & id_g & via_g & for_g
+        
+        parse_to_dict = Dict(grouped_data)
+        
+        try:
+            rec_dict = parse_to_dict.parseString(self._rec)
+        except ParseException:
+            rec_dict = {}
+        
+        return rec_dict
+    
+    def _fill_values(self):
+        space = " "
+
+        ########### From #############
+        if self._FROM in self.received.keys():
+            raw_from = self.received[self._FROM]
+        else:
+            raw_from = ""
+        
+        if type(raw_from) != str and len(raw_from) >1:
+            self.From = space.join(raw_from)
+        else:
+            self.From = raw_from
+            
+        ########### By #############        
+        if self._BY in self.received.keys():
+            raw_by = self.received[self._BY]
+        else:
+            raw_by = ""
+            
+        if type(raw_by) != str and len(raw_by) > 1:
+            self.By = space.join(raw_by)
+        else:
+            self.By = raw_by
+        
+        ########### With ############            
+        if self._WITH in self.received.keys():
+            raw_with = self.received[self._WITH]
+        else:
+            raw_with = ""
+        
+        if type(raw_with) != str and len(raw_by) > 1:
+            self.With = space.join(raw_with)
+        else:
+            self.With = raw_with
+            
+        ########### Id #############
+        if self._ID in self.received.keys():
+            raw_id = self.received[self._ID]
+        else:
+            raw_id = ""
+        
+        if type(raw_id) != str and len(raw_id) > 1:
+            self.Id = space.join(raw_id)
+        else:
+            self.Id = raw_id
+    
+        ########### Via ############
+        if self._VIA in self.received.keys():
+            raw_via = self.received[self._VIA]
+        else:
+            raw_via = ""
+            
+        if type(raw_via) != str and len(raw_via) > 1:
+            self.Via = space.join(raw_via)
+        else:
+            self.Via = raw_via
+
+        ########### For ############
+        if self._FOR in self.received.keys():
+            raw_for = self.received[self._FOR]
+        else:
+            raw_for = ""
+        
+        if type(raw_for) != str and len(raw_for) > 1:
+            self.For = space.join(raw_for)
+        else:
+            self.For = raw_for
+    
     
     def __str__(self):
         return self.__repr__()
-    
+
     def __repr__(self):
-        string = "Received("
-        vals = ""
-        for key in self._values.keys():
-            if self._values[key] == '' or self._values[key] == []:
-                pass
-            else:
-                vals = vals + str(key) + "=" + str(self._values[key]) + ","
-        if vals == "":
-            return ""
-        else:
-            return string + vals[:-1] + ")"
+        repr_str = "Received(rec_dict={"
+        if self.From != "":
+            repr_str += "\'from\':\'" + self.From + "\', "
+        if self.By != "":
+            repr_str += "\'by\':\'" + self.By + "\', "
+        if self.Via != "":
+            repr_str += "\'via\':\'" + self.Via + "\', "
+        if self.With != "":
+            repr_str += "\'with\':\'" + self.With + "\', "
+        if self.For != "":
+            repr_str += "\'for\':\'" + self.For + "\', "
+        if self._date_string != "":
+            repr_str += "\'date\':\'" + self._date_string + "\' "
+        repr_str += "})"
+        
+        return repr_str
+    
