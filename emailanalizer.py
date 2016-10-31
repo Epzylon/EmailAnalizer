@@ -1,6 +1,7 @@
 #/usr/bin/env python
 import argparse
 from email import message_from_file as open_efile
+from prettytable import PrettyTable
 from TokenAnalizer.Trace.received import Received
 
 
@@ -22,6 +23,11 @@ else:
     e = open_efile(open(args.mail_file))
     reclist = e.get_all('Received')
     reclist.reverse()
-    for H in reclist:
-        r = Received(H)
-        print(r)
+    table = PrettyTable(['From','By','Date','With','Via','ID'])
+    for line in reclist:
+        l = Received(line)
+        table.add_row([l.From,l.By,l.Date,l.With,l.Via,l.Id])
+    print(table)
+        
+
+        
