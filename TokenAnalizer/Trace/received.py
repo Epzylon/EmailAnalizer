@@ -190,7 +190,7 @@ class Received(object):
                 #Set the date property
                 self.Date = ParseDate(self._date_string)
             except ValueError:
-                raise InvalidToken('','No Date string found')
+                raise InvalidToken('', 'No Date string found')
 
              
         self._fill_values()
