@@ -172,7 +172,7 @@ class Received(object):
     def __init__(self,received_value,rec_dict={}):
         
         #Split the rec string and the date
-        if received_value.find(';'):
+        if received_value.find(';') != -1:
             self._rec,self._date_string = received_value.split(';')
             
             #Strip new line strings
@@ -186,8 +186,12 @@ class Received(object):
         else:
             self.received = self._parse_rec_string()   
             
-            #Set the date property
-            self.Date = ParseDate(self._date_string)
+            try:
+                #Set the date property
+                self.Date = ParseDate(self._date_string)
+            except ValueError:
+                raise InvalidToken('','No Date string found')
+
              
         self._fill_values()
    
