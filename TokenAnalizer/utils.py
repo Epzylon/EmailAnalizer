@@ -11,20 +11,19 @@ from pyparsing import OneOrMore, Optional, Suppress, Forward, alphanums, Word
 class TextUtils(object):
     ''' Several string/text utils '''
     
-    def __init__(self,raw):
+    def __init__(self, raw):
         self.raw = raw
         self._NULL = ''
-        self._PARENTHESES = [('[',']'),('<','>'),('{','}'),('(',')')]
+        self._PARENTHESES = [('[', ']'), ('<', '>'), ('{', '}'), ('(', ')')]
     
     def remove_chars(self,char_list):
         '''Remove the chars given from the text'''
         for c in char_list:
-            result = self.raw.replace(c,self._NULL)
+            result = self.raw.replace(c, self._NULL)
     
         return result
     
-           
-    def get_enclosed(self,raw):
+    def get_enclosed(self, raw):
     
         #Word ::= Ascii - Tokens
         non_token = "!#$%&\'*+,-./:;=?@\\^_`|~"
@@ -34,7 +33,7 @@ class TextUtils(object):
         #Tokens ::= {}[]()<>
         tokens = "{}[]()<>"  
     
-        o_curly,c_curly,o_brack,c_brack,o_paren,c_paren,o_mayor,c_mayor = map(Suppress,tokens)
+        o_curly, c_curly, o_brack, c_brack, o_paren, c_paren, o_mayor, c_mayor = map(Suppress, tokens)
 
         enclosed_data = Forward()
         
@@ -50,8 +49,6 @@ class TextUtils(object):
     
         return enclosed_data.parseString(raw)
         
-    
-    
 class WhatIs(object):
     '''
     Try to determine what is the given value
