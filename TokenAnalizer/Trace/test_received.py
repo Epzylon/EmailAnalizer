@@ -1,4 +1,5 @@
 from unittest import TestCase
+from TokenAnalizer.Trace.received import Received
 # From cases could contain or not:
 #  from, by, via, with, id, for
 wanted_ip = {'ip':'1.2.3.4'}
@@ -43,9 +44,14 @@ from_clauses = [
     {'test': 'from [1.2.3.4] ([1.2.3.4:999] someoption=xxx.xxx.com xxx.xxx.com)', 'name': 'from[ip]([ip:port])option', 'comment': 'from [ip] ([ip:port]) option',
      'wanted': wanted_ip_others},
     {'test': 'from [1.2.3.4:999] ([1.2.3.4:999] someoption=xxx.xxx.com xxx.xxx.com)', 'name': 'from[ip:port]([ip:port])option', 'comment': 'from [ip:port] ([ip:port]) option',
-     wanted_ip_others}
+     'wanted': wanted_ip_others}
 ]
 
 class TestReceived(TestCase):
     def test__parse_rec_string(self):
-        self.fail()
+        for test in from_clauses:
+            date_string = ';Sat, 23 Nov 2019 07:18:41 -0800 (PST)'
+            t = Received(test['test']+date_string)
+            print(t)
+            self.assertEqual(test['wanted'], t.received)
+
