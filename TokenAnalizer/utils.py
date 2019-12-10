@@ -16,7 +16,7 @@ class TextUtils(object):
         self._NULL = ''
         self._PARENTHESES = [('[', ']'), ('<', '>'), ('{', '}'), ('(', ')')]
     
-    def remove_chars(self,char_list):
+    def remove_chars(self, char_list):
         '''Remove the chars given from the text'''
         for c in char_list:
             result = self.raw.replace(c, self._NULL)

@@ -170,28 +170,25 @@ class Received(object):
     'FOR': 'for'
     }
 
-
     def __init__(self, received_value, rec_dict={}):
         # The received_value could be a dict or a string
         if rec_dict != {}:
             self.received = rec_dict
         else:
             try:
-                #In case of string it MUST have ; to separate the date
-                #Split the rec string and the date
+                # In case of string it MUST have ; to separate the date
+                # Split the rec string and the date
                 self._rec, self._date_string = received_value.split(';')
 
             except AttributeError:
                 raise InvalidToken(received_value, ";")
             else:
-                #Strip new line strings
+                # Strip new line strings
                 self.received = self._parse_rec_string()
                 self.received['date'] = ParseDate(self._date_string.replace('\n',''))
                 self.DATE = self.received['date']
 
         self._fill_values()
-
-
 
     def _parse_rec_string(self):
         '''
@@ -239,6 +236,9 @@ class Received(object):
                 else:
                     value = self.received[token.lower()]
                 setattr(self, token, value)
+
+    def _analize_values(self):
+        pass
 
     def __str__(self):
         return self.__repr__()
