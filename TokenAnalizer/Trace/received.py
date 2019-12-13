@@ -184,6 +184,7 @@ class Received(object):
                 raise InvalidToken(received_value, ";")
             else:
                 # Strip new line strings
+                #TODO: Use dateutil to parse the date string
                 self.received = self._parse_rec_string()
                 self.received['date'] = ParseDate(self._date_string.replace('\n',''))
                 self.DATE = self.received['date']
