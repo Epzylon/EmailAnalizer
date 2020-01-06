@@ -4,26 +4,26 @@ Created on Mar 8, 2016
 @author: Gustavo Rodriguez
 '''
 
-#Email utils
-from email.utils import parsedate as ParseDate
+# Email utils
 from email.utils import parseaddr as ParseAddr
 
-#Customized raised errors
-from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
+#Date utils lib
+from dateutil.parser import parse as DateParse
 
-#Ip object
+# Ip object
 from ipaddress import ip_address as ip
 
-#Utils to parse some strings
+# Utils to parse some strings
 from TokenAnalizer.utils import WhatIs, TextUtils
 
-#Pyparsing objects
+# Pyparsing objects
 from pyparsing import OneOrMore, Group, Optional, Dict, Word, CaselessKeyword,\
     ParseException, printables
 
-#TODO: Create a FOR class
+# Customized raised errors
+from HeaderAnalizer.EmailTracertErrors import InvalidValue, InvalidToken
 
-
+# TODO: Create a FOR class
 
 
 class ExtendedDomain(object):
@@ -33,30 +33,29 @@ class ExtendedDomain(object):
     This object receive this strings and make the analisys/disection
     '''
 
+    def __init__(self, value=None, ip=None, domain=None, port=None, extra=None):
 
-    def __init__(self,value=None,ip=None,domain=None,port=None,extra=None):
-
-        #Values dictionary
-        self._values = {'ip':'',
+        # Values dictionary
+        self._values = {'ip': '',
               'domain':'',
               'port':'',
               'extra':[]
               }
-        self.__r_chars = ['[',']','(',')']
+        self.__r_chars = ['[', ']', '(', ')']
 
-        if value == None:
-            if ip != None:
+        if value is None:
+            if ip is not None:
                 self._values['ip'] = ip
-            if domain != None:
+            if domain is not None:
                 self._values['domain'] = domain
-            if port != None:
+            if port is not None:
                 self._values['port'] = port
-            if extra != None:
+            if extra is not None:
                 self._values['extra'] = extra
         else:
             self.__fill_values(value)
 
-        #TODO: Please fix this uggly uggly method!
+        # TODO: Please fix this ugly ugly method!
         self.__generate_attributes()
 
     def __str__(self):
@@ -73,45 +72,44 @@ class ExtendedDomain(object):
         if r_attr == "":
             return ""
         else:
-            #Strip the last ,
+            # Strip the last ,
             r = r + r_attr[:-1]
             r = r + ")"
             return r
 
     def __fill_values(self,value_list):
         for val in value_list:
-            #TODO: Before remove brackets and parenthesis
-            #we should agroup this info
+            # TODO: Before remove brackets and parenthesis
+            # we should agroup this info
             val = TextUtils(val).remove_chars(self.__r_chars)
 
-            #Test if it is a domain
+            # Test if it is a domain
             if self.__is_domain(val):
                 self._values['domain'] = val
-            #Test if it is a ipv4
+            # Test if it is a ipv4
             elif WhatIs(val).IsIPv4():
                 self._values['ip'] = ip(val)
-            #Test if it is a ipv6
-            #TODO:Check
-            #BUG:Check if it really degtect IPv6
+            # Test if it is a ipv6
+            # TODO:Check
+            # BUG:Check if it really degtect IPv6
             elif WhatIs(val).IsIPv6():
                 self._values['ip'] = ip(val)
-            #Otherwise
+            # Otherwise
             else:
-                #It could be a tuple ip:port
+                # It could be a tuple ip:port
                 if val.find(':') != -1:
                     possible_ip,*port = val.split(':')
                     if WhatIs(possible_ip).IsIP():
                         self._values['ip'] = ip(possible_ip)
                         self._values['port'] = port
-                #Or somenthing else
+                # Or somenthing else
                 else:
                     self._values['extra'].append(val)
 
-
-    #TODO: Replace with utils function
+    # TODO: Replace with utils function
     def __is_domain(self,value):
-        #Domain should have at least on dot
-        #TODO: Please improve this!!!!
+        # Domain should have at least on dot
+        # TODO: Please improve this!!!!
         if value.find('.') != -1:
             v_list = value.split(".")
             if v_list[-1].isalpha():
@@ -125,15 +123,15 @@ class ExtendedDomain(object):
         # This function is to load the values in the dict
         # to an attributes of the ExtendedDomain Object
 
-        #Create attributes with no values
+        # Create attributes with no values
         self.ip = ''
         self.domain = ''
         self.port = ''
         self.extra = ''
         self.address = ''
 
-        #fill attributes
-        #TODO: Fix that! type(val) != ip
+        # fill attributes
+        # TODO: Fix that! type(val) != ip
         if True:
             self.ip = self._values['ip']
 
@@ -147,7 +145,7 @@ class ExtendedDomain(object):
             for e in self._values['extra']:
                 self.extra = self.extra + ' ' + e
 
-        #This attribute is a easy way to get the ip or the domain
+        # This attribute is a easy way to get the ip or the domain
         if self.ip != '':
             self.address = str(self.ip)
         elif self.domain != '':
@@ -161,7 +159,7 @@ class Received(object):
     https://tools.ietf.org/html/rfc5321#section-4.4
     '''
 
-    tokens = {
+    _tokens = {
     'FROM': 'from',
     'BY': 'by',
     'VIA': 'via',
@@ -184,9 +182,9 @@ class Received(object):
                 raise InvalidToken(received_value, ";")
             else:
                 # Strip new line strings
-                #TODO: Use dateutil to parse the date string
                 self.received = self._parse_rec_string()
-                self.received['date'] = ParseDate(self._date_string.replace('\n',''))
+                # self.received['date'] = ParseDate(self._date_string.replace('\n', ''))
+                self.received['date'] = DateParse(self._date_string.replace('\n', ''))
                 self.DATE = self.received['date']
 
         self._fill_values()
@@ -195,28 +193,27 @@ class Received(object):
         '''
         Pyparsing parser to the received string
         '''
-        #any word
+        # any word
         word = Word(printables)
 
-        #recognized tokens
-        from_t = CaselessKeyword(self.tokens['FROM'])
-        by_t = CaselessKeyword(self.tokens['BY'])
-        with_t = CaselessKeyword(self.tokens['WITH'])
-        id_t = CaselessKeyword(self.tokens['ID'])
-        via_t = CaselessKeyword(self.tokens['VIA'])
-        for_t = CaselessKeyword(self.tokens['FOR'])
+        # recognized tokens
+        from_t = CaselessKeyword(self._tokens['FROM'])
+        by_t = CaselessKeyword(self._tokens['BY'])
+        with_t = CaselessKeyword(self._tokens['WITH'])
+        id_t = CaselessKeyword(self._tokens['ID'])
+        via_t = CaselessKeyword(self._tokens['VIA'])
+        for_t = CaselessKeyword(self._tokens['FOR'])
 
-        #A group of non tokens
+        # A group of non tokens
         phrase = from_t | by_t | with_t | id_t | via_t | for_t
 
-        #Group phrase with token
+        # Group phrase with token
         from_g = Optional(Group(from_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
         by_g = Optional(Group(by_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
         with_g = Optional(Group(with_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
         id_g = Optional(Group(id_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
         via_g = Optional(Group(via_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
         for_g = Optional(Group(for_t + OneOrMore(word, stopOn=phrase).setParseAction(' '.join)))
-
 
         grouped_data = from_g & by_g & with_g & id_g & via_g & for_g
 
@@ -230,7 +227,7 @@ class Received(object):
 
     def _fill_values(self):
         space = " "
-        for token in self.tokens.keys():
+        for token in self._tokens.keys():
             if token.lower() in self.received.keys():
                 if type(self.received[token.lower()]) != str and len(self.received[token]) >1:
                     value = space.join(self.received[token.lower()])
