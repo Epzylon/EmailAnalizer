@@ -10,7 +10,8 @@ pdesc = "Analize email headers"
 
 parser = argparse.ArgumentParser(description=pdesc, prog=pname)
 
-parser.add_argument('-T', '--tracert', help="Show the trace path of the email")
+parser.add_argument('-T', '--tracert', help="Show the trace path of the email",
+                    action='store_true')
 parser.add_argument('-f', '--file', dest='mail_file',
                     action='store', help='Email file')
 
@@ -26,6 +27,6 @@ else:
     table = PrettyTable(['From', 'By', 'Date', 'With', 'Via', 'ID'])
     for line in reclist:
         l = Received(line)
-        table.add_row([l.From, l.By, l.Date, l.With, l.Via, l.Id])
+        table.add_row([l.FROM, l.BY, l.DATE, l.WITH, l.VIA, l.ID])
     print(table)
 
